@@ -22,12 +22,12 @@ export async function POST(req: NextRequest) {
   };
 
   const client = new OpenAI({
-    baseURL: "https://api.thesys.dev/v1/embed",
-    apiKey: process.env.THESYS_API_KEY,
+    baseURL: "https://api.dev.thesys.dev/v1/embed",
+    apiKey: process.env.THESYS_API_KEY || "",
   });
 
   const runToolsResponse = client.beta.chat.completions.runTools({
-    model: "c1/anthropic/claude-3.5-sonnet/v-20250617", // available models: https://docs.thesys.dev/guides/models-pricing#model-table
+    model: "c1/anthropic/claude-sonnet-4.6/v-20260331", // available models: https://docs.thesys.dev/guides/models-pricing#model-table
     messages: [
       ...(await getLLMThreadMessages(threadId)),
       {

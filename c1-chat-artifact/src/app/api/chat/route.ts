@@ -30,20 +30,20 @@ export async function POST(req: NextRequest) {
   // embed client for the LLM
   const embedClient = new OpenAI({
     apiKey,
-    baseURL: "https://api.thesys.dev/v1/embed",
+    baseURL: "https://api.dev.thesys.dev/v1/embed",
   });
 
   // artifacts client for the artifacts API to create and edit artifacts
   const artifactsClient = new OpenAI({
     apiKey,
-    baseURL: "https://api.thesys.dev/v1/artifact",
+    baseURL: "https://api.dev.thesys.dev/v1/artifact",
   });
 
   const c1Response = makeC1Response();
 
   try {
     const runner = embedClient.chat.completions.runTools({
-      model: "c1/openai/gpt-5/v-20250930",
+      model: "c1/anthropic/claude-sonnet-4.6/v-20260331",
       messages: [...getMessages(threadId), { role: "user", content: prompt.content }],
       stream: true,
       tools: tools.map((tool) => ({

@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
 
   const client = new OpenAI({
     apiKey,
-    baseURL: "https://api.thesys.dev/v1/artifact",
+    baseURL: "https://api.dev.thesys.dev/v1/artifact",
   });
 
   const messages: Array<{
@@ -36,18 +36,16 @@ export async function POST(req: NextRequest) {
   }
   messages.push({ role: "user", content: prompt });
 
-  const stream = client.chat.completions.runTools({
+  const stream = await client.chat.completions.create({
     model: "c1/artifact/v-20251030",
     stream: true,
     messages,
-    abortSignal: req.signal,
-    tools: [],
     metadata: {
       thesys: JSON.stringify({
         id: artifactId,
         c1_artifact_type: artifactType,
       }),
-    }
+    },
   });
 
   const c1Response = makeC1Response();
@@ -66,7 +64,7 @@ export async function POST(req: NextRequest) {
       }
     },
     {
-      onError: (error) => {
+      onError: (error: unknown) => {
         console.error("Error in ask route:", error);
       },
       onEnd: () => {
