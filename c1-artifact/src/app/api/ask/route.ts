@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
   messages.push({ role: "user", content: prompt });
 
   const stream = await client.chat.completions.create({
-    model: "c1/artifact/v-20251030",
+    model: "c1/artifact/v-20260130",
     stream: true,
     messages,
     metadata: {

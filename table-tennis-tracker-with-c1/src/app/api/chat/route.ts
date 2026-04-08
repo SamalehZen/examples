@@ -63,7 +63,7 @@ Important rules:
   ];
 
   const runner = client.beta.chat.completions.runTools({
-    model: "c1/anthropic/claude-3.5-sonnet/v-20250709",
+    model: "c1/anthropic/claude-sonnet-4.6/v-20260331",
     messages,
     stream: true,
     tools: getTennisTools(c1Response.writeThinkItem),

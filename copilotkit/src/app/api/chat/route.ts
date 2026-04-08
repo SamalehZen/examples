@@ -17,7 +17,7 @@ export const POST = async (req: NextRequest) => {
   const serviceAdapter = new OpenAIAdapter({
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     openai: openai as any,
-    model: "c1/anthropic/claude-sonnet-4/v-20250815",
+    model: "c1/anthropic/claude-sonnet-4.6/v-20260331",
   });
   const runtime = new CopilotRuntime();
 
