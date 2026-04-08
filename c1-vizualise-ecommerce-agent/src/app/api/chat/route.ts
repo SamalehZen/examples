@@ -14,13 +14,13 @@ type ThreadId = string;
 
 // Standard OpenAI client
 const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
+  apiKey: process.env.OPENAI_API_KEY || "",
 });
 
 // Thesys Visualize client
 const thesysClient = new OpenAI({
   baseURL: "https://api.thesys.dev/v1/visualize",
-  apiKey: process.env.THESYS_API_KEY,
+  apiKey: process.env.THESYS_API_KEY || "",
 });
 
 const SYSTEM_PROMPT = `You are a friendly and helpful e-commerce assistant specializing in clothing. Your goal is to help users find products, learn about them, and manage their shopping cart.
@@ -116,7 +116,7 @@ export async function POST(req: NextRequest) {
 
   // --- Step 4: Call Thesys  API and Stream to Client ---
   const thesysStreamRunner = thesysClient.beta.chat.completions.runTools({
-    model: "c1/anthropic/claude-sonnet-4/v-20251230",
+    model: "c1/anthropic/claude-sonnet-4.6/v-20260331",
     messages: [
       ...previousAiMessages,
       { role: "user", content: prompt.content! } as ChatCompletionMessageParam,

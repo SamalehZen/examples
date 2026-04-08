@@ -11,7 +11,7 @@ interface Params {
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: Params }
+  { params }: { params: Promise<Params> },
 ) {
   try {
     const message = (await request.json()) as Message;
@@ -22,14 +22,14 @@ export async function POST(
     console.error("Error adding message:", error);
     return NextResponse.json(
       { message: "Error adding message" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Params }
+  { params }: { params: Promise<Params> },
 ) {
   try {
     const updatedMessage = (await request.json()) as Message;
@@ -40,7 +40,7 @@ export async function PUT(
     console.error("Error updating message:", error);
     return NextResponse.json(
       { message: "Error updating message" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

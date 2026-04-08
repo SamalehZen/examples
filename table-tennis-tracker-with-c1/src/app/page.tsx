@@ -9,9 +9,9 @@ import {
 } from "@thesysai/genui-sdk";
 import * as apiClient from "@/src/apiClient";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 
-export default function Home() {
+function HomeContent() {
   const searchParams = useSearchParams();
   const threadIdInUrl = searchParams.get("threadId");
   const pathname = usePathname();
@@ -59,5 +59,13 @@ export default function Home() {
         threadListManager={threadListManager}
       />
     </ThemeProvider>
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense>
+      <HomeContent />
+    </Suspense>
   );
 }

@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
 
   try {
     const runner = embedClient.chat.completions.runTools({
-      model: "c1/openai/gpt-5/v-20250930",
+      model: "c1/anthropic/claude-sonnet-4.6/v-20260331",
       messages: [...getMessages(threadId), { role: "user", content: prompt.content }],
       stream: true,
       tools: tools.map((tool) => ({
@@ -117,8 +117,9 @@ export async function POST(req: NextRequest) {
     const llmStream = await runner;
 
     // Stream final response
-    const responseStream = transformStream(
+    transformStream(
       llmStream,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (chunk: any) => {
         const content = chunk.choices[0]?.delta?.content;
         if (content) {

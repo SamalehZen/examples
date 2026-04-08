@@ -9,7 +9,7 @@ const messageStore = new Map<ThreadId, StoredMessage[]>();
 // Helper functions
 function getMessages(threadId: ThreadId): ChatCompletionMessageParam[] {
   const messages = messageStore.get(threadId) || [];
-  return messages.map(({ id, ...msg }) => msg); // Remove IDs for LLM
+  return messages.map(({ id: _id, ...msg }) => msg);
 }
 
 function addMessages(threadId: ThreadId, ...msgs: StoredMessage[]) {

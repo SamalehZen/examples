@@ -1,4 +1,4 @@
-import { PrismaClient } from "@prisma/client";
+import { PrismaClient } from "../../generated/prisma";
 import { randomInt, randomBytes } from "crypto";
 
 export async function initializeDb(prisma: PrismaClient) {
@@ -55,7 +55,7 @@ export async function initializeDb(prisma: PrismaClient) {
       }
 
       let winnerId = null;
-      let status = "COMPLETED";
+      const status = "COMPLETED";
 
       if (playerAScore > playerBScore) {
         winnerId = playerA.id;

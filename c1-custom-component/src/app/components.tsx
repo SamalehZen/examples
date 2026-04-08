@@ -230,6 +230,7 @@ export const BookingSummary = ({
   passengers,
   price,
 }: {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   flight: any;
   seats: string[];
   passengers: {
