@@ -30,13 +30,13 @@ export async function POST(req: NextRequest) {
   // embed client for the LLM
   const embedClient = new OpenAI({
     apiKey,
-    baseURL: "https://api.dev.thesys.dev/v1/embed",
+    baseURL: "https://api.thesys.dev/v1/embed",
   });
 
   // artifacts client for the artifacts API to create and edit artifacts
   const artifactsClient = new OpenAI({
     apiKey,
-    baseURL: "https://api.dev.thesys.dev/v1/artifact",
+    baseURL: "https://api.thesys.dev/v1/artifact",
   });
 
   const c1Response = makeC1Response();
@@ -117,8 +117,9 @@ export async function POST(req: NextRequest) {
     const llmStream = await runner;
 
     // Stream final response
-    const responseStream = transformStream(
+    transformStream(
       llmStream,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       (chunk: any) => {
         const content = chunk.choices[0]?.delta?.content;
         if (content) {

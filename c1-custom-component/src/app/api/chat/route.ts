@@ -100,7 +100,7 @@ export async function POST(req: NextRequest) {
   });
 
   const llmStream = client.chat.completions.runTools({
-    model: "c1/anthropic/claude-sonnet-4/v-20250930", // available models: https://docs.thesys.dev/guides/models-pricing#model-table
+    model: "c1/anthropic/claude-sonnet-4.6/v-20260331", // available models: https://docs.thesys.dev/guides/models-pricing#model-table
     messages: messageStore.getOpenAICompatibleMessageList(),
     stream: true,
     tools,

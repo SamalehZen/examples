@@ -8,14 +8,15 @@ import { getTennisTools } from "./tools";
 import { ChatCompletionMessageParam } from "openai/resources/chat/completions.mjs";
 import { makeC1Response } from "@thesysai/genui-sdk/server";
 
+export const dynamic = "force-dynamic";
+
 type ThreadId = string;
 
-const client = new OpenAI({
-  baseURL: "https://api.thesys.dev/v1/embed",
-  apiKey: process.env.THESYS_API_KEY,
-});
-
 export async function POST(req: NextRequest) {
+  const client = new OpenAI({
+    baseURL: "https://api.thesys.dev/v1/embed",
+    apiKey: process.env.THESYS_API_KEY,
+  });
   const c1Response = makeC1Response();
 
   c1Response.writeThinkItem({

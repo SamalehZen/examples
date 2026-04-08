@@ -14,7 +14,13 @@ export default function Page() {
   });
   const [input, setInput] = useState("");
 
-  const handleC1Action = ({ llmFriendlyMessage, humanFriendlyMessage }) => {
+  const handleC1Action = ({
+    llmFriendlyMessage,
+    humanFriendlyMessage,
+  }: {
+    llmFriendlyMessage: string;
+    humanFriendlyMessage: string;
+  }) => {
     sendMessage({
       text: llmFriendlyMessage,
       metadata: { humanFriendlyMessage },
@@ -36,7 +42,8 @@ export default function Page() {
                   <div key={message.id} className="p-3 rounded-lg bg-gray-50">
                     {message.role === "user" ? (
                       <div className="text-sm text-gray-700">
-                        {message.metadata?.humanFriendlyMessage || text}
+                        {(message.metadata as Record<string, string>)
+                          ?.humanFriendlyMessage || text}
                       </div>
                     ) : (
                       <C1Component

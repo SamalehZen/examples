@@ -14,6 +14,7 @@ export const getTennisTools = (
     description: string;
     ephemeral?: boolean;
   }) => Promise<void>,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
 ): RunnableToolFunctionWithParse<any>[] => [
   {
     type: "function",
@@ -149,7 +150,8 @@ export const getTennisTools = (
     function: {
       name: "getLeaderboard",
       description: "Shows a leaderboard of all players, ranked by their wins.",
-      parse: (input) => {},
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      parse: (_input) => ({}),
       parameters: zodToJsonSchema(z.object({})) as JSONSchema,
       function: async () => {
         writeThinkItem({

@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { z } from "zod";
 import { zodToJsonSchema } from "zod-to-json-schema";
 import type { RunnableToolFunctionWithParse } from "openai/lib/RunnableFunction.mjs";
@@ -16,7 +17,6 @@ export const createPresentationTool: RunnableToolFunctionWithParse<any> = {
       })
     ) as any,
     function: async () => {
-      // This is a placeholder - actual implementation happens in the route handler
       return "Tool function placeholder";
     },
   },

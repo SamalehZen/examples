@@ -5,13 +5,9 @@ import {
   Message,
 } from "@/src/services/threadService";
 
-interface Params {
-  threadId: string;
-}
-
 export async function POST(
   request: NextRequest,
-  { params }: { params: Params },
+  { params }: { params: Promise<{ threadId: string }> },
 ) {
   try {
     const message = (await request.json()) as Message;
@@ -29,7 +25,7 @@ export async function POST(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Params },
+  { params }: { params: Promise<{ threadId: string }> },
 ) {
   try {
     const updatedMessage = (await request.json()) as Message;

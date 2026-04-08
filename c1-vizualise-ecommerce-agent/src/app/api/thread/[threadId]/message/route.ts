@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
 import {
-  addUIMessage,
   addMessages,
   Message,
   updateMessage,
@@ -12,7 +11,7 @@ interface Params {
 
 export async function POST(
   request: NextRequest,
-  { params }: { params: Params }
+  { params }: { params: Promise<Params> }
 ) {
   try {
     const message = (await request.json()) as Message;
@@ -30,7 +29,7 @@ export async function POST(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: Params }
+  { params }: { params: Promise<Params> }
 ) {
   try {
     const updatedMessage = (await request.json()) as Message;

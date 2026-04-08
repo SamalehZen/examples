@@ -9,16 +9,18 @@
     "lint": "next lint"
   },
   "dependencies": {
-    "@crayonai/react-core": "^0.7.6",
-    "@crayonai/react-ui": "0.8.14",
+    "@crayonai/react-core": "0.7.7",
+    "@crayonai/react-ui": "0.9.16",
     "@crayonai/stream": "0.6.4",
-    "@thesysai/genui-sdk": "0.6.27",
+    "@thesysai/genui-sdk": "0.9.0",
     "firebase": "^11.6.1",
     "next": "15.3.0",
     "openai": "^4.95.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-ui": "1.0.0-beta.32"
+    "react-ui": "1.0.0-beta.32",
+    "zod": "^3.25.76",
+    "zod-to-json-schema": "^3.25.2"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

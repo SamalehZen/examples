@@ -92,7 +92,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
         onError: (error) => {
           console.error("Error in chat route:", error);
           c1Response.writeContent(
-            "Sorry, I encountered an error processing your request."
+            "Sorry, I encountered an error processing your request.",
           );
         },
         onEnd: ({ accumulated }) => {
@@ -104,7 +104,7 @@ export async function POST(req: NextRequest): Promise<NextResponse> {
           });
           c1Response.end();
         },
-      }
+      },
     );
 
     return new NextResponse(c1Response.responseStream, {

@@ -1,15 +1,16 @@
+export const dynamic = "force-dynamic";
+
 import { NextRequest } from "next/server";
 import OpenAI from "openai";
 import { ChatCompletionMessageParam } from "openai/resources/chat/completions";
 import { transformStream } from "@crayonai/stream";
 import { tools } from "./tools";
 
-const client = new OpenAI({
-  baseURL: "https://api.thesys.dev/v1/embed",
-  apiKey: process.env.THESYS_API_KEY,
-});
-
 export async function POST(req: NextRequest) {
+  const client = new OpenAI({
+    baseURL: "https://api.thesys.dev/v1/embed",
+    apiKey: process.env.THESYS_API_KEY,
+  });
   const { prompt, previousC1Response } = (await req.json()) as {
     prompt: string;
     previousC1Response?: string;

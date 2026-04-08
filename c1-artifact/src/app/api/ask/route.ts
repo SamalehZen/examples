@@ -22,7 +22,7 @@ export async function POST(req: NextRequest) {
 
   const client = new OpenAI({
     apiKey,
-    baseURL: "https://api.dev.thesys.dev/v1/artifact",
+    baseURL: "https://api.thesys.dev/v1/artifact",
   });
 
   const messages: Array<{

@@ -11,6 +11,7 @@ import "@crayonai/react-ui/styles/index.css";
 import { useCopilotChat } from "@copilotkit/react-core";
 import { MessageRole, TextMessage } from "@copilotkit/runtime-client-gql";
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const AssistantMessageRenderer = ({ message, isGenerating }: any) => {
   const { appendMessage } = useCopilotChat();
   // In the Assistant Message, render the C1Component rather than rendering a markdown message.
@@ -25,13 +26,14 @@ const AssistantMessageRenderer = ({ message, isGenerating }: any) => {
             // Action is a object with 2 keys: llmFriendlyMessage and humanFriendlyMessage.
             // We stringify is because the content field of CopilotKit is a string.
             content: JSON.stringify(action),
-          })
+          }),
         );
       }}
     />
   );
 };
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 const UserMessageRenderer = ({ message }: any) => {
   // Since content can either be a string or a json object (in the case of an Action)
   // we need to parse it and extract the humanFriendlyMessage incase its a json object.
@@ -39,7 +41,7 @@ const UserMessageRenderer = ({ message }: any) => {
   try {
     const { humanFriendlyMessage } = JSON.parse(message?.content || "{}");
     content = humanFriendlyMessage;
-  } catch (error) {}
+  } catch (_error) {}
   return (
     <UserMessage
       message={{ ...message, content }}

@@ -1,13 +1,9 @@
 import { NextRequest, NextResponse } from "next/server";
 import { getUIThreadMessages } from "@/src/services/threadService";
 
-interface Params {
-  threadId: string;
-}
-
 export async function GET(
   request: NextRequest,
-  { params }: { params: Params },
+  { params }: { params: Promise<{ threadId: string }> },
 ) {
   try {
     const { threadId } = await params;

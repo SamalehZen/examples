@@ -4,12 +4,18 @@ import { z } from "zod";
 import { zodToJsonSchema } from "zod-to-json-schema";
 import { tavily } from "@tavily/core";
 
-const tavilyClient = tavily({ apiKey: process.env.TAVILY_API_KEY });
+let tavilyClient: ReturnType<typeof tavily>;
+function getTavilyClient() {
+  if (!tavilyClient) {
+    tavilyClient = tavily({ apiKey: process.env.TAVILY_API_KEY });
+  }
+  return tavilyClient;
+}
 
 export const tools: [
   RunnableToolFunctionWithParse<{
     searchQuery: string;
-  }>
+  }>,
 ] = [
   {
     type: "function",
@@ -23,10 +29,10 @@ export const tools: [
       parameters: zodToJsonSchema(
         z.object({
           searchQuery: z.string().describe("search query"),
-        })
+        }),
       ) as JSONSchema,
       function: async ({ searchQuery }: { searchQuery: string }) => {
-        const results = await tavilyClient.search(searchQuery, {
+        const results = await getTavilyClient().search(searchQuery, {
           maxResults: 5,
         });
 

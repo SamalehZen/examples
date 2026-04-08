@@ -37,7 +37,7 @@ export async function POST(req: NextRequest) {
           id: responseId,
         });
       },
-    }
+    },
   ) as ReadableStream<string>;
 
   return new NextResponse(responseStream, {
