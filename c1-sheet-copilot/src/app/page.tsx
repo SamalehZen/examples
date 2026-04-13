@@ -10,6 +10,15 @@ import {
 import { SpreadsheetTable, PersistentSpreadsheet } from "./components";
 import { TableProvider, useTableContext } from "./TableContext";
 import { useEffect } from "react";
+import { z } from "zod4/v4";
+
+const spreadsheetTableComponent = {
+  component: SpreadsheetTable,
+  schema: z.object({
+    data: z.array(z.array(z.union([z.string(), z.number(), z.null()]))),
+    colHeaders: z.array(z.string()).optional(),
+  }),
+} as const;
 
 function ChatWithTable() {
   const { setThreadId } = useTableContext();
@@ -36,7 +45,7 @@ function ChatWithTable() {
     onUpdateMessage: async () => {},
     apiUrl: "/api/chat",
     customizeC1: {
-      customComponents: { SpreadsheetTable },
+      customComponents: { SpreadsheetTable: spreadsheetTableComponent },
     },
   });
 
@@ -54,7 +63,7 @@ function ChatWithTable() {
       threadManager={threadManager}
       threadListManager={threadListManager}
       customizeC1={{
-        customComponents: { SpreadsheetTable },
+        customComponents: { SpreadsheetTable: spreadsheetTableComponent },
       }}
       welcomeMessage={{
         title: "Hi, I'm your Spreadsheet Assistant",
