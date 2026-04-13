@@ -8,14 +8,15 @@ import { getTennisTools } from "./tools";
 import { ChatCompletionMessageParam } from "openai/resources/chat/completions.mjs";
 import { makeC1Response } from "@thesysai/genui-sdk/server";
 
+export const dynamic = "force-dynamic";
+
 type ThreadId = string;
 
-const client = new OpenAI({
-  baseURL: "https://api.thesys.dev/v1/embed",
-  apiKey: process.env.THESYS_API_KEY,
-});
-
 export async function POST(req: NextRequest) {
+  const client = new OpenAI({
+    baseURL: "https://api.thesys.dev/v1/embed",
+    apiKey: process.env.THESYS_API_KEY,
+  });
   const c1Response = makeC1Response();
 
   c1Response.writeThinkItem({
@@ -62,7 +63,7 @@ Important rules:
   ];
 
   const runner = client.beta.chat.completions.runTools({
-    model: "c1/anthropic/claude-3.5-sonnet/v-20250709",
+    model: "c1/anthropic/claude-sonnet-4.6/v-20260331",
     messages,
     stream: true,
     tools: getTennisTools(c1Response.writeThinkItem),

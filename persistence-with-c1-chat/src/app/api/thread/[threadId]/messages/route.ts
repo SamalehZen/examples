@@ -7,7 +7,7 @@ interface Params {
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: Params }
+  { params }: { params: Promise<Params> },
 ) {
   try {
     const { threadId } = await params;
@@ -17,7 +17,7 @@ export async function GET(
     console.error("Error fetching UI messages:", error);
     return NextResponse.json(
       { message: "Error fetching UI messages" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

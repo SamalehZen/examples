@@ -43,7 +43,7 @@ export async function POST(req: NextRequest) {
   messageStore.addMessage(prompt);
 
   const llmStream = client.beta.chat.completions.runTools({
-    model: "c1/anthropic/claude-3.5-sonnet/v-20250617", // available models: https://docs.thesys.dev/guides/models-pricing#model-table
+    model: "c1/anthropic/claude-sonnet-4.6/v-20260331", // available models: https://docs.thesys.dev/guides/models-pricing#model-table
     messages: messageStore.getOpenAICompatibleMessageList(),
     stream: true,
     tools: [
@@ -94,7 +94,7 @@ export async function POST(req: NextRequest) {
           id: responseId,
         });
       },
-    }
+    },
   ) as ReadableStream<string>;
 
   return new NextResponse(responseStream, {

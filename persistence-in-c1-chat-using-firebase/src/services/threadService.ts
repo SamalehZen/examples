@@ -10,7 +10,7 @@ import {
   Timestamp,
   query,
   orderBy,
-  serverTimestamp
+  serverTimestamp,
 } from "firebase/firestore";
 import { Thread } from "@crayonai/react-core";
 import { Message as UIMessage } from "@thesysai/genui-sdk";
@@ -44,7 +44,10 @@ export const getThreadList = async (): Promise<Thread[]> => {
     return {
       threadId: doc.id,
       title: data.name,
-      createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate() : new Date(data.createdAt),
+      createdAt:
+        data.createdAt instanceof Timestamp
+          ? data.createdAt.toDate()
+          : new Date(data.createdAt),
     };
   });
 };
@@ -67,47 +70,50 @@ export const addMessages = async (threadId: string, ...messages: Message[]) => {
 };
 
 export const getUIThreadMessages = async (
-  threadId: string
+  threadId: string,
 ): Promise<UIMessage[]> => {
   if (!threadId) return [];
   const threadRef = doc(db, THREADS_COLLECTION, threadId);
   const threadSnap = await getDoc(threadRef);
 
   if (!threadSnap.exists()) {
-    console.warn(`Thread with id ${threadId} not found for getUIThreadMessages.`);
+    console.warn(
+      `Thread with id ${threadId} not found for getUIThreadMessages.`,
+    );
     return [];
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const messages = (threadSnap.data()?.messages as any[]) ?? [];
 
-  const uiMessages = messages
-    .filter(
-      (msg) =>
-        !(
-          msg.role === "tool" ||
-          (msg.role === "assistant" && msg.tool_calls)
-        ) && ["user", "assistant"].includes(msg.role)
-    );
+  const uiMessages = messages.filter(
+    (msg) =>
+      !(msg.role === "tool" || (msg.role === "assistant" && msg.tool_calls)) &&
+      ["user", "assistant"].includes(msg.role),
+  );
 
   return uiMessages;
 };
 
 export const getLLMThreadMessages = async (
-  threadId: string
+  threadId: string,
 ): Promise<ChatCompletionMessageParam[]> => {
   if (!threadId) return [];
   const threadRef = doc(db, THREADS_COLLECTION, threadId);
   const threadSnap = await getDoc(threadRef);
 
   if (!threadSnap.exists()) {
-    console.warn(`Thread with id ${threadId} not found for getLLMThreadMessages.`);
+    console.warn(
+      `Thread with id ${threadId} not found for getLLMThreadMessages.`,
+    );
     return [];
   }
 
   const messages = (threadSnap.data()?.messages as Message[]) ?? [];
 
   const llmMessages = messages.map((msg) => {
-    const { id, ...llmMessage } = msg;
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+    const { id: _id, ...llmMessage } = msg;
     return llmMessage as ChatCompletionMessageParam;
   });
 
@@ -116,7 +122,7 @@ export const getLLMThreadMessages = async (
 
 export const updateMessage = async (
   threadId: string,
-  updatedMessage: UIMessage
+  updatedMessage: UIMessage,
 ): Promise<void> => {
   if (!threadId) throw new Error("threadId is required for updateMessage");
   if (updatedMessage.role !== "assistant") {
@@ -127,14 +133,14 @@ export const updateMessage = async (
 
   if (!threadSnap.exists()) {
     console.warn(
-      `Thread with id ${threadId} not found. Cannot update message.`
+      `Thread with id ${threadId} not found. Cannot update message.`,
     );
     return;
   }
 
   const messages = (threadSnap.data()?.messages as Message[]) ?? [];
   const messageIndex = messages.findIndex(
-    (msg) => msg.id === updatedMessage.id
+    (msg) => msg.id === updatedMessage.id,
   );
 
   if (messageIndex !== -1) {
@@ -146,7 +152,7 @@ export const updateMessage = async (
     await updateDoc(threadRef, { messages: messages });
   } else {
     console.warn(
-      `Message with id ${updatedMessage.id} not found in thread ${threadId}.`
+      `Message with id ${updatedMessage.id} not found in thread ${threadId}.`,
     );
   }
 };
@@ -161,22 +167,29 @@ export const updateThread = async (thread: {
   threadId: string;
   name: string;
 }): Promise<Thread> => {
-  if (!thread.threadId) throw new Error("thread.threadId is required for updateThread");
+  if (!thread.threadId)
+    throw new Error("thread.threadId is required for updateThread");
   const threadRef = doc(db, THREADS_COLLECTION, thread.threadId);
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const updates: { name: string; updatedAt?: any } = { name: thread.name };
 
   await updateDoc(threadRef, updates);
 
   const updatedSnap = await getDoc(threadRef);
   if (!updatedSnap.exists()) {
-    throw new Error(`Thread with id ${thread.threadId} not found after update.`);
+    throw new Error(
+      `Thread with id ${thread.threadId} not found after update.`,
+    );
   }
   const data = updatedSnap.data()!;
 
   return {
     threadId: updatedSnap.id,
     title: data.name,
-    createdAt: data.createdAt instanceof Timestamp ? data.createdAt.toDate() : new Date(data.createdAt),
+    createdAt:
+      data.createdAt instanceof Timestamp
+        ? data.createdAt.toDate()
+        : new Date(data.createdAt),
   };
 };

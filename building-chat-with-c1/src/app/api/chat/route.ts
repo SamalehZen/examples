@@ -3,7 +3,7 @@ import OpenAI from "openai";
 import { tools } from "./tools";
 import { systemPrompt } from "./systemPrompt";
 import { transformStream } from "@crayonai/stream";
-import type { ChatCompletionMessageParam } from "openai/resources.mjs";
+import type { ChatCompletionMessageParam } from "openai/resources/chat/completions.mjs";
 
 type ThreadId = string;
 
@@ -24,11 +24,11 @@ export async function POST(req: NextRequest) {
 
   const client = new OpenAI({
     baseURL: "https://api.thesys.dev/v1/embed",
-    apiKey: process.env.THESYS_API_KEY,
+    apiKey: process.env.THESYS_API_KEY || "",
   });
 
   const llmStream = client.chat.completions.runTools({
-    model: "c1/anthropic/claude-sonnet-4/v-20250930", // available models: https://docs.thesys.dev/guides/models-pricing#model-table
+    model: "c1/anthropic/claude-sonnet-4.6/v-20260331", // available models: https://docs.thesys.dev/guides/models-pricing#model-table
     messages: messageStore.get(threadId)!,
     stream: true,
     parallelToolCalls: true,

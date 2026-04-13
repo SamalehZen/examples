@@ -9,7 +9,7 @@ export async function POST(req: Request) {
   const model = createOpenAI({
     apiKey: process.env.THESYS_API_KEY,
     baseURL: "https://api.thesys.dev/v1/embed",
-  }).chat("c1/anthropic/claude-sonnet-4/v-20250815");
+  }).chat("c1/anthropic/claude-sonnet-4.6/v-20260331");
   const result = streamText({
     model: model,
     messages: convertToModelMessages(messages),

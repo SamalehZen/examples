@@ -5,7 +5,6 @@ import {
   C1Chat,
   useThreadListManager,
   useThreadManager,
-  Message,
 } from "@thesysai/genui-sdk";
 import {
   createThread,
@@ -14,12 +13,11 @@ import {
   getUIThreadMessages,
   updateMessage,
   updateThread,
-  Message as ServiceMessage,
 } from "@/src/services/threadService";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect } from "react";
+import { Suspense, useEffect } from "react";
 
-export default function Home() {
+function HomeContent() {
   const searchParams = useSearchParams();
   const threadIdInUrl = searchParams.get("threadId");
   const pathname = usePathname();
@@ -62,5 +60,13 @@ export default function Home() {
       threadManager={threadManager}
       threadListManager={threadListManager}
     />
+  );
+}
+
+export default function Home() {
+  return (
+    <Suspense>
+      <HomeContent />
+    </Suspense>
   );
 }
