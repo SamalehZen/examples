@@ -14,6 +14,54 @@ function deepClone<T>(obj: T): T {
   return JSON.parse(JSON.stringify(obj));
 }
 
+// Convert a 0-based column index to an Excel-style letter (A, B, ..., Z, AA, AB, ...)
+function columnLetter(index: number): string {
+  let n = index;
+  let label = "";
+  while (n >= 0) {
+    label = String.fromCharCode(65 + (n % 26)) + label;
+    n = Math.floor(n / 26) - 1;
+  }
+  return label;
+}
+
+function makeDefaultHeaders(count: number): string[] {
+  return Array.from({ length: count }, (_, i) => `Column ${columnLetter(i)}`);
+}
+
+// Convert a SheetJS cell into the app's CellValue, preserving formulas as `=...` strings
+function sheetCellToValue(cell: unknown): CellValue {
+  if (cell === null || cell === undefined) return null;
+  const c = cell as { t?: string; v?: unknown; f?: string; w?: string };
+
+  if (typeof c.f === "string" && c.f.length > 0) {
+    return c.f.startsWith("=") ? c.f : `=${c.f}`;
+  }
+
+  const v = c.v;
+  if (v === null || v === undefined) return null;
+
+  switch (c.t) {
+    case "n":
+      return typeof v === "number" && Number.isFinite(v) ? v : null;
+    case "s":
+      return typeof v === "string" ? v : String(v);
+    case "b":
+      return v ? "TRUE" : "FALSE";
+    case "d":
+      if (typeof c.w === "string" && c.w.length > 0) return c.w;
+      if (v instanceof Date) return v.toISOString();
+      return String(v);
+    case "e":
+      return null;
+    default:
+      if (typeof v === "number") return Number.isFinite(v) ? v : null;
+      if (typeof v === "string") return v;
+      if (typeof v === "boolean") return v ? "TRUE" : "FALSE";
+      return null;
+  }
+}
+
 interface SpreadsheetTableProps {
   data: CellValue[][];
   colHeaders?: string[];
@@ -68,9 +116,12 @@ export const PersistentSpreadsheet = () => {
   const { tableData, syncTableData } = useTableContext();
   const hotRef = useRef<any>(null);
   const containerRef = useRef<HTMLDivElement>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const [isClient, setIsClient] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
   const [containerHeight, setContainerHeight] = useState(400);
+  const [isImporting, setIsImporting] = useState(false);
+  const [importError, setImportError] = useState<string | null>(null);
 
   // Track context data to detect updates from AI
   const lastContextDataRef = useRef<string>("");
@@ -251,6 +302,100 @@ export const PersistentSpreadsheet = () => {
     });
   }, []);
 
+  // Trigger the hidden file input for Excel import
+  const handleImportClick = useCallback(() => {
+    setImportError(null);
+    fileInputRef.current?.click();
+  }, []);
+
+  // Parse the selected Excel file entirely in the browser and load it into the table
+  const handleFileChange = useCallback(
+    async (event: React.ChangeEvent<HTMLInputElement>) => {
+      const input = event.target;
+      const file = input.files?.[0];
+      input.value = "";
+      if (!file) return;
+
+      setIsImporting(true);
+      setImportError(null);
+
+      try {
+        const XLSX = await import("xlsx");
+        const buffer = await file.arrayBuffer();
+        const workbook = XLSX.read(buffer, {
+          type: "array",
+          cellFormula: true,
+          cellDates: true,
+        });
+
+        if (!workbook.SheetNames || workbook.SheetNames.length === 0) {
+          throw new Error("Workbook contains no sheets");
+        }
+
+        const sheet = workbook.Sheets[workbook.SheetNames[0]];
+        const ref = sheet["!ref"];
+
+        let importedData: CellValue[][];
+        let importedHeaders: string[];
+
+        if (!ref) {
+          importedHeaders = makeDefaultHeaders(6);
+          importedData = Array.from({ length: 10 }, () => Array(6).fill(null));
+        } else {
+          const range = XLSX.utils.decode_range(ref);
+          const numCols = range.e.c - range.s.c + 1;
+          const numRows = range.e.r - range.s.r + 1;
+
+          const matrix: CellValue[][] = [];
+          for (let r = 0; r < numRows; r++) {
+            const row: CellValue[] = [];
+            for (let c = 0; c < numCols; c++) {
+              const addr = XLSX.utils.encode_cell({
+                r: range.s.r + r,
+                c: range.s.c + c,
+              });
+              row.push(sheetCellToValue(sheet[addr]));
+            }
+            matrix.push(row);
+          }
+
+          const firstRow = matrix[0];
+          const firstRowHasContent =
+            !!firstRow &&
+            firstRow.some((v) => v !== null && v !== undefined && v !== "");
+
+          if (firstRowHasContent) {
+            importedHeaders = firstRow.map((v, i) => {
+              if (v === null || v === undefined || v === "") {
+                return `Column ${columnLetter(i)}`;
+              }
+              return String(v);
+            });
+            importedData = matrix.slice(1);
+            if (importedData.length === 0) {
+              importedData = [Array(numCols).fill(null)];
+            }
+          } else {
+            importedHeaders = makeDefaultHeaders(numCols);
+            importedData = matrix.length
+              ? matrix
+              : [Array(numCols).fill(null)];
+          }
+        }
+
+        await syncTableData(importedData, importedHeaders);
+      } catch (err) {
+        console.error("Failed to import Excel file:", err);
+        setImportError(
+          err instanceof Error ? err.message : "Failed to import Excel file"
+        );
+      } finally {
+        setIsImporting(false);
+      }
+    },
+    [syncTableData]
+  );
+
   // Show loading state while Handsontable is loading
   if (!isClient || !HotTable || !HyperFormula) {
     return (
@@ -275,19 +420,48 @@ export const PersistentSpreadsheet = () => {
             <h2 className="text-lg font-semibold text-neutral-100">Spreadsheet</h2>
             <p className="text-xs text-neutral-400 mt-1">
               {currentData.length} rows × {currentHeaders?.length || currentData[0]?.length || 0} columns
+              {isImporting && (
+                <span className="ml-2 text-blue-300">Importing…</span>
+              )}
             </p>
+            {importError && (
+              <p className="text-xs text-red-400 mt-1" role="alert">
+                Import failed: {importError}
+              </p>
+            )}
           </div>
-          <button
-            onClick={handleExportCSV}
-            className="px-3 py-1.5 text-sm bg-neutral-700 hover:bg-neutral-600 text-neutral-100 rounded-md transition-colors flex items-center gap-2"
-          >
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
-              <polyline points="7 10 12 15 17 10" />
-              <line x1="12" y1="15" x2="12" y2="3" />
-            </svg>
-            Export CSV
-          </button>
+          <div className="flex items-center gap-2">
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".xlsx,.xls,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-excel"
+              onChange={handleFileChange}
+              className="hidden"
+            />
+            <button
+              onClick={handleImportClick}
+              disabled={isImporting}
+              className="px-3 py-1.5 text-sm bg-neutral-700 hover:bg-neutral-600 disabled:opacity-50 disabled:cursor-not-allowed text-neutral-100 rounded-md transition-colors flex items-center gap-2"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="17 8 12 3 7 8" />
+                <line x1="12" y1="3" x2="12" y2="15" />
+              </svg>
+              {isImporting ? "Importing…" : "Import Excel"}
+            </button>
+            <button
+              onClick={handleExportCSV}
+              className="px-3 py-1.5 text-sm bg-neutral-700 hover:bg-neutral-600 text-neutral-100 rounded-md transition-colors flex items-center gap-2"
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                <polyline points="7 10 12 15 17 10" />
+                <line x1="12" y1="15" x2="12" y2="3" />
+              </svg>
+              Export CSV
+            </button>
+          </div>
         </div>
       </div>
       <div ref={containerRef} className="flex-1 overflow-hidden">
